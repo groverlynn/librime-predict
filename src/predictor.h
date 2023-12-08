@@ -19,17 +19,21 @@ class Predictor : public Processor {
  protected:
   void OnContextUpdate(Context* ctx);
   void OnSelect(Context* ctx);
+  void OnOptionUpdate(Context* ctx, const string& option);
   void PredictAndUpdate(Context* ctx, const string& context_query);
 
  private:
-  enum Action { kUnspecified, kSelect, kDelete };
+  enum Action { kUnspecified, kSelect, kDelete, kInitiate };
   Action last_action_ = kUnspecified;
+  string initials_ = "zyxwvutsrqponmlkjihgfedcba";
+  string selectors_ = "1234567890";
   bool self_updating_ = false;
   int iteration_counter_ = 0;  // times has been predicted
 
   an<PredictEngine> predict_engine_;
   connection select_connection_;
   connection context_update_connection_;
+  connection option_update_connection_;
 };
 
 class PredictorComponent : public Predictor::Component {
