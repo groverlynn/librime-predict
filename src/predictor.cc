@@ -87,18 +87,26 @@ ProcessResult Predictor::ProcessKeyEvent(const KeyEvent& key_event) {
   } else if (!selectors_.empty() && keycode >= 0x20 && keycode < 0x7f &&
              !key_event.modifier() &&
              selectors_.find((char)keycode) != string::npos) {
-    if (ctx->composition().back().HasTag("prediction") &&
-        ctx->Select(selectors_.find((char)keycode))) {
-      last_action_ = kSelect;
-      return kAccepted;
+    if (ctx->composition().back().HasTag("prediction")) {
+      int page_size = engine_->schema()->page_size();
+      int index = selectors_.find((char)keycode);
+      int page_start = (ctx->composition().back().selected_index / page_size) * page_size;
+      if (index < page_size && ctx->Select(page_start + index)) {
+        last_action_ = kSelect;
+        return kAccepted;
+      }
     }
   } else if (selectors_.empty() && !key_event.modifier() &&
              ((keycode >= XK_0 && keycode <= XK_9) ||
               (keycode >= XK_KP_0 && keycode <= XK_KP_9))) {
-    if (ctx->composition().back().HasTag("prediction") &&
-        ctx->Select((keycode % 0x10 + 9) % 10)) {
-      last_action_ = kSelect;
-      return kAccepted;
+    if (ctx->composition().back().HasTag("prediction")) {
+      int page_size = engine_->schema()->page_size();
+      int index = (keycode % 0x10 + 9) % 10;
+      int page_start = (ctx->composition().back().selected_index / page_size) * page_size;
+      if (index < page_size && ctx->Select(page_start + index)) {
+        last_action_ = kSelect;
+        return kAccepted;
+      }
     }
   } else {
     last_action_ = kUnspecified;
